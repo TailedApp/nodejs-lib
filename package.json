@@ -2,7 +2,7 @@
   "name": "@tailedapp/nodejs-lib",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "type": "module",
   "scripts": {
     "pack": "npm pack"
