@@ -25,6 +25,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fallback-version: 1.0.0
           output-file: "false"
+          skip-on-empty: "false"
 
       - name: Create Release # This action will create the actual release
         uses: actions/create-release@v1
