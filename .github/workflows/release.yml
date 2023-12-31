@@ -1,0 +1,47 @@
+name: Release # Workflow name displayed on GitHub
+permissions:
+  contents: write
+  pull-requests: write 
+on:
+  workflow_dispatch: # Trigger manually
+jobs:
+  new-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3 # Checkout our working repository
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install modules
+        run: npm install
+
+      - name: Create Changelog
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v3.7.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fallback-version: 1.0.0
+          output-file: "false"
+
+      - name: Create Release # This action will create the actual release
+        uses: actions/create-release@v1
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.changelog.outputs.tag }}
+          release_name: ${{ steps.changelog.outputs.tag }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+
+      - name: Pack
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        run: npm run pack
+
+      - name: Publish
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        run: npm publish --access=public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
